@@ -17,14 +17,16 @@ En `app.js`:
 const SITE_CONFIG = {
   siteName: "Yeshivah Nezer",
   ownerEmail: "rabbihillel.aa@gmail.com",
-  emailEndpoint: "",
+  emailEndpoint: "/api/contact",
   webpayEndpoint: "",
   webpayFallbackLink: "",
-  currency: "CLP",
+  currency: "USD",
 };
 ```
 
-Los cursos y donativos están expresados como montos finales en pesos chilenos para Webpay.
+Los cursos y donativos se muestran en dólares estadounidenses para que la oferta sea más universal. Cuando se conecte Webpay, el backend deberá convertir el total USD a pesos chilenos antes de crear la transacción, porque Webpay procesa pagos locales en CLP.
+
+La sección de requisitos está incluida en la página y los testimonios usan las fotografías reales de alumnos dentro de avatares circulares.
 
 ## Webpay
 

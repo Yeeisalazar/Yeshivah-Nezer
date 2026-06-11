@@ -4,7 +4,7 @@ const SITE_CONFIG = {
   emailEndpoint: "/api/contact",
   webpayEndpoint: "",
   webpayFallbackLink: "",
-  currency: "CLP",
+  currency: "USD",
 };
 
 const COURSES = [
@@ -18,8 +18,8 @@ const COURSES = [
     mode: "Teórico y práctico",
     level: "Formación especializada",
     prices: {
-      regular: 400000,
-      jevruta: 300000,
+      regular: 400,
+      jevruta: 300,
     },
   },
 
@@ -33,8 +33,8 @@ const COURSES = [
     mode: "Formación guiada",
     level: "Liderazgo comunitario",
     prices: {
-      regular: 500000,
-      jevruta: 350000,
+      regular: 500,
+      jevruta: 350,
     },
   },
   {
@@ -47,8 +47,8 @@ const COURSES = [
     mode: "Programa halájico",
     level: "Avanzado",
     prices: {
-      regular: 650000,
-      jevruta: 350000,
+      regular: 650,
+      jevruta: 350,
     },
   },
   {
@@ -61,8 +61,8 @@ const COURSES = [
     mode: "Diseñado para mujeres",
     level: "Formación aplicada",
     prices: {
-      regular: 450000,
-      jevruta: 350000,
+      regular: 450,
+      jevruta: 350,
     },
   },
 ];
@@ -91,7 +91,7 @@ const elements = {
 };
 
 let cart = loadCart();
-let selectedDonationAmount = 18000;
+let selectedDonationAmount = 18;
 
 function loadCart() {
   try {
@@ -116,11 +116,7 @@ function escapeHtml(value) {
 }
 
 function formatMoney(amount) {
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    maximumFractionDigits: 0,
-  }).format(Number(amount));
+  return `US$ ${Number(amount).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 }
 
 function renderSiteName() {
@@ -526,6 +522,7 @@ function initScrollAnimations() {
   const animatedSelectors = [
     ".values-band article",
     ".section-heading",
+    ".requirement-card",
     ".service-card",
     ".bio-gallery",
     ".bio-copy",

@@ -136,7 +136,7 @@ button {
 .site-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 18px;
+  gap: 8px 16px;
   justify-content: center;
   color: inherit;
   font-family: var(--sans);
@@ -458,6 +458,7 @@ button {
 }
 
 .section,
+.requirements-section,
 .bio-section,
 .contact-section,
 .recommendation-panel {
@@ -516,6 +517,58 @@ button {
 .service-grid,
 .testimonial-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.requirements-section {
+  background: var(--white);
+}
+
+.requirements-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.requirement-card {
+  min-height: 210px;
+  padding: 24px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: var(--soft-shadow);
+  transition:
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.requirement-card:hover {
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.14);
+  transform: translateY(-3px);
+}
+
+.requirement-card span {
+  display: inline-grid;
+  min-height: 30px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 4px 10px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold);
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.requirement-card h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  line-height: 1.16;
+}
+
+.requirement-card p {
+  margin: 10px 0 0;
+  color: rgba(0, 0, 0, 0.72);
 }
 
 .course-card,
@@ -654,7 +707,6 @@ button {
   border: 1px solid var(--gold);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  filter: grayscale(1) contrast(1.06);
 }
 
 .bio-gallery img:first-child {
@@ -674,12 +726,12 @@ button {
 }
 
 .testimonial-card {
-  min-height: 250px;
+  min-height: 360px;
 }
 
 .testimonial-card p {
   margin: 0 0 18px;
-  font-size: 1.08rem;
+  font-size: 1rem;
 }
 
 .testimonial-card strong,
@@ -687,11 +739,42 @@ button {
   display: block;
 }
 
+.testimonial-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.testimonial-person {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.testimonial-person img {
+  width: 74px;
+  height: 74px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.testimonial-person strong {
+  font-size: 1.05rem;
+}
+
+.testimonial-person span {
+  color: var(--gold);
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
 .recommendation-panel {
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(280px, 0.55fr);
+  grid-template-columns: minmax(260px, 0.6fr) minmax(0, 1.4fr);
   gap: 28px;
-  align-items: end;
+  align-items: start;
   background: var(--black);
   color: var(--white);
 }
@@ -716,6 +799,31 @@ button {
   font-family: var(--sans);
   font-weight: 900;
   text-decoration: none;
+}
+
+.document-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.document-list a {
+  display: grid;
+  gap: 10px;
+  min-height: auto;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.document-list img {
+  width: 100%;
+  aspect-ratio: 0.75;
+  border: 1px solid rgba(185, 149, 59, 0.45);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--white);
+  object-fit: cover;
+  object-position: top center;
+}
+
+.document-list span {
+  display: block;
 }
 
 .letter-list a:hover,
@@ -1011,6 +1119,7 @@ textarea:focus {
 
 @media (max-width: 920px) {
   .values-band,
+  .requirements-grid,
   .forms-grid,
   .contact-section,
   .bio-section,
@@ -1052,7 +1161,8 @@ textarea:focus {
   .site-nav.is-open,
   .course-grid,
   .service-grid,
-  .testimonial-grid {
+  .testimonial-grid,
+  .document-list {
     grid-template-columns: 1fr;
   }
 
