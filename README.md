@@ -18,39 +18,27 @@ const SITE_CONFIG = {
   siteName: "Yeshivah Nezer",
   ownerEmail: "rabbihillel.aa@gmail.com",
   emailEndpoint: "/api/contact",
-  webpayEndpoint: "",
-  webpayFallbackLink: "",
+  whatsappNumber: "56993001241",
   currency: "USD",
 };
 ```
 
-Los cursos y donativos se muestran en dólares estadounidenses para que la oferta sea más universal. Cuando se conecte Webpay, el backend deberá convertir el total USD a pesos chilenos antes de crear la transacción, porque Webpay procesa pagos locales en CLP.
+Los cursos y donativos se muestran en dólares estadounidenses para que la oferta sea más universal. El carrito no procesa pagos; genera una solicitud directa al rabino.
 
 La sección de requisitos está incluida en la página y los testimonios usan las fotografías reales de alumnos dentro de avatares circulares.
 
-## Webpay
+## Flujo de contacto
 
-El sitio ya tiene el flujo visual solicitado:
+El sitio usa un flujo combinado:
 
 1. El alumno agrega cursos o donativos al carrito.
 2. Completa un formulario con nombre, correo, teléfono, ubicación y comentarios.
-3. Presiona `Generar link Webpay`.
-
-Para que el pago con tarjeta funcione en producción, falta conectar `webpayEndpoint` a un backend o servicio que cree la transacción Webpay. Ese backend debe devolver una de estas dos respuestas:
-
-```json
-{ "paymentUrl": "https://..." }
-```
-
-o:
-
-```json
-{ "url": "https://webpay...", "token": "token_ws..." }
-```
-
-Mientras no exista ese endpoint, el sitio prepara el pedido y abre un correo dirigido a `rabbihillel.aa@gmail.com` con el detalle.
+3. Presiona `Enviar solicitud al rabino`.
+4. El sitio intenta enviar la solicitud a `rabbihillel.aa@gmail.com` usando `/api/contact`.
+5. También abre WhatsApp con el mensaje armado para `+56 9 9300 1241`.
+6. Si `/api/contact` aún no está conectado, abre un correo de respaldo con el mismo detalle.
 
 ## Formularios de contacto
 
-Los formularios están configurados para enviar los datos por `POST` a `/api/contact`. Ese endpoint debe implementarse en el hosting/backend y enviar el correo a `rabbihillel.aa@gmail.com`.
+Los formularios están configurados para enviar los datos por `POST` a `/api/contact`. Ese endpoint debe implementarse en el hosting/backend y enviar el correo a `rabbihillel.aa@gmail.com`. Mientras tanto, el sitio abre un correo de respaldo dirigido a esa misma dirección.
 # Yeshivah-Nezer

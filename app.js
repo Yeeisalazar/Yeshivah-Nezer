@@ -2,8 +2,7 @@ const SITE_CONFIG = {
   siteName: "Yeshivah Nezer",
   ownerEmail: "rabbihillel.aa@gmail.com",
   emailEndpoint: "/api/contact",
-  webpayEndpoint: "",
-  webpayFallbackLink: "",
+  whatsappNumber: "56993001241",
   currency: "USD",
 };
 
@@ -154,7 +153,7 @@ function renderCourses() {
             <span class="price-note">Valor individual: ${formatMoney(course.prices.regular)}</span>
           </div>
           <div class="card-actions">
-            <button class="button primary" type="button" data-buy-course="${course.id}">Comprar ahora</button>
+            <button class="button primary" type="button" data-buy-course="${course.id}">Solicitar inscripción</button>
             <button class="button outline" type="button" data-add-course="${course.id}">Agregar al carrito</button>
           </div>
         </div>
@@ -202,7 +201,7 @@ function setDirectBuy(item) {
   saveCart();
   renderCart();
   openCart();
-  showToast("Completa tus datos para generar el pago Webpay.");
+  showToast("Completa tus datos para enviar la solicitud al rabino.");
   elements.checkoutForm.querySelector("input[name='name']")?.focus();
 }
 
@@ -271,7 +270,7 @@ function removeLine(itemId) {
 
 function createOrder(customer) {
   return {
-    id: `YCH-${Date.now()}`,
+    id: `YN-${Date.now()}`,
     site: SITE_CONFIG.siteName,
     currency: SITE_CONFIG.currency,
     total: cartTotal(),
@@ -308,27 +307,41 @@ function orderToText(order) {
   return lines.join("\n");
 }
 
-function submitWebpayForm(url, token) {
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = url;
-  form.style.display = "none";
-
-  const input = document.createElement("input");
-  input.type = "hidden";
-  input.name = "token_ws";
-  input.value = token;
-
-  form.append(input);
-  document.body.append(form);
-  form.submit();
+function createMailtoUrl(subject, message) {
+  const params = new URLSearchParams({ subject, body: message });
+  return `mailto:${SITE_CONFIG.ownerEmail}?${params.toString()}`;
 }
 
-async function startWebpayCheckout(event) {
+function createWhatsappUrl(message) {
+  const params = new URLSearchParams({ text: message });
+  return `https://wa.me/${SITE_CONFIG.whatsappNumber}?${params.toString()}`;
+}
+
+async function sendEmailNotification(subject, message, payload = {}) {
+  if (!SITE_CONFIG.emailEndpoint) return false;
+
+  try {
+    const response = await fetch(SITE_CONFIG.emailEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: SITE_CONFIG.ownerEmail,
+        subject,
+        message,
+        ...payload,
+      }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function submitEnrollmentRequest(event) {
   event.preventDefault();
 
   if (!cart.length) {
-    showToast("Agrega un curso o donativo antes de pagar.");
+    showToast("Agrega un curso o donativo antes de enviar la solicitud.");
     return;
   }
 
@@ -337,46 +350,24 @@ async function startWebpayCheckout(event) {
   const formData = new FormData(elements.checkoutForm);
   const customer = Object.fromEntries(formData.entries());
   const order = createOrder(customer);
+  const subject = `${SITE_CONFIG.siteName} - Solicitud de inscripción ${order.id}`;
+  const message = orderToText(order);
+  const whatsappMessage = `${subject}\n\n${message}`;
+  const whatsappWindow = window.open(createWhatsappUrl(whatsappMessage), "_blank", "noopener");
 
-  if (SITE_CONFIG.webpayEndpoint) {
-    try {
-      showToast("Generando link de pago Webpay...");
-      const response = await fetch(SITE_CONFIG.webpayEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(order),
-      });
-      if (!response.ok) throw new Error("No se pudo crear la transacción");
-      const data = await response.json();
+  showToast("Enviando solicitud al rabino...");
+  const emailSent = await sendEmailNotification(subject, message, {
+    formType: "checkout",
+    order,
+  });
 
-      if (data.paymentUrl) {
-        window.location.href = data.paymentUrl;
-        return;
-      }
-
-      if (data.url && data.token) {
-        submitWebpayForm(data.url, data.token);
-        return;
-      }
-
-      throw new Error("Respuesta Webpay incompleta");
-    } catch {
-      showToast("No se pudo generar el pago Webpay. Revisa la integración.");
-      return;
-    }
-  }
-
-  if (SITE_CONFIG.webpayFallbackLink) {
-    const params = new URLSearchParams({
-      order: order.id,
-      amount: String(order.total),
-      email: order.customer.email,
-    });
-    window.open(`${SITE_CONFIG.webpayFallbackLink}?${params.toString()}`, "_blank", "noopener");
+  if (emailSent) {
+    showToast(whatsappWindow ? "Solicitud enviada y WhatsApp abierto." : "Solicitud enviada al correo del rabino.");
     return;
   }
 
-  showToast("Falta conectar Webpay para generar el pago con tarjeta.");
+  window.location.href = createMailtoUrl(subject, message);
+  showToast("Se abrió WhatsApp y un correo de respaldo para completar la solicitud.");
 }
 
 function selectDonationAmount(button) {
@@ -411,24 +402,21 @@ async function submitEmailForm(event) {
   const body = Object.entries(payload)
     .map(([key, value]) => `${key}: ${value}`)
     .join("\n");
+  const message = `${body}\n\nDestino: ${SITE_CONFIG.ownerEmail}`;
 
-  try {
-    const response = await fetch(SITE_CONFIG.emailEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: SITE_CONFIG.ownerEmail,
-        subject,
-        message: body,
-        ...payload,
-      }),
-    });
-    if (!response.ok) throw new Error("No se pudo enviar");
+  const emailSent = await sendEmailNotification(subject, message, {
+    formType: label,
+    ...payload,
+  });
+
+  if (emailSent) {
     form.reset();
     showToast("Mensaje enviado correctamente.");
-  } catch {
-    showToast("El envío automático requiere conectar /api/contact en el hosting.");
+    return;
   }
+
+  window.location.href = createMailtoUrl(subject, message);
+  showToast("No se pudo enviar automáticamente; se abrió un correo de respaldo.");
 }
 
 function showToast(message) {
@@ -491,7 +479,7 @@ function bindEvents() {
   });
 
   elements.donationForm.addEventListener("submit", addDonation);
-  elements.checkoutForm.addEventListener("submit", startWebpayCheckout);
+  elements.checkoutForm.addEventListener("submit", submitEnrollmentRequest);
 
   $$("[data-email-form]").forEach((form) => {
     form.addEventListener("submit", submitEmailForm);
