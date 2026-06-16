@@ -7,6 +7,7 @@ Sitio estático para cursos, biografía, cartas de recomendación, contacto, don
 - `index.html`: estructura del sitio y formularios.
 - `styles.css`: diseño responsive en blanco, negro y dorado.
 - `app.js`: cursos, precios, carrito, donativos, contacto y flujo de checkout.
+- `api/contact.js`: función serverless de Vercel para enviar formularios por correo.
 - `assets/`: logo, fotografías del rabino y cartas de recomendación.
 
 ## Datos configurados
@@ -40,5 +41,31 @@ El sitio usa un flujo combinado:
 
 ## Formularios de contacto
 
-Los formularios están configurados para enviar los datos por `POST` a `/api/contact`. Ese endpoint debe implementarse en el hosting/backend y enviar el correo a `rabbihillel.aa@gmail.com`. Mientras tanto, el sitio abre un correo de respaldo dirigido a esa misma dirección.
+Los formularios están configurados para enviar los datos por `POST` a `/api/contact`. Ese endpoint usa Resend desde Vercel y envía el correo a `rabbihillel.aa@gmail.com`. Mientras Resend no tenga API key configurada, el sitio mantiene el respaldo por WhatsApp y correo del usuario.
+
+Variables necesarias en Vercel:
+
+```txt
+RESEND_API_KEY=re_xxxxxxxxx
+CONTACT_TO_EMAIL=rabbihillel.aa@gmail.com
+CONTACT_FROM_EMAIL=Yeshivah Nezer <contacto@yeshivanezer.org>
+```
+
+`CONTACT_FROM_EMAIL` debe pertenecer a un dominio verificado en Resend. Para pruebas se puede usar temporalmente `Yeshivah Nezer <onboarding@resend.dev>`.
+
+## Dominio
+
+Dominio final: `yeshivanezer.org`.
+
+En Vercel hay que agregar:
+
+- `yeshivanezer.org`
+- `www.yeshivanezer.org`
+
+DNS recomendado:
+
+- Apex/root `yeshivanezer.org`: registro `A` apuntando a `76.76.21.21`.
+- Subdominio `www`: registro `CNAME` apuntando al valor que indique Vercel para el proyecto.
+
+Despues de cambiar las DNS, Vercel emitira SSL automaticamente cuando detecte los registros correctos.
 # Yeshivah-Nezer
